@@ -6,11 +6,12 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -38,6 +39,27 @@ export class UploadsController {
 
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
+  @Post('products/:id/poster')
+  @ApiOperation({ summary: 'Upload product poster image (main product image)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  uploadPoster(
+    @Param('id', ParseIntPipe) productId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.uploadsService.uploadProductPoster(productId, file);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
   @Post('uploads/images')
   @ApiOperation({ summary: 'Upload one or multiple product images' })
   @ApiConsumes('multipart/form-data')
@@ -60,7 +82,7 @@ export class UploadsController {
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiBearerAuth()
   @Post('products/:id/images')
-  @ApiOperation({ summary: 'Upload gallery images for a product' })
+  @ApiOperation({ summary: 'Upload multiple gallery images for a product' })
   @UseInterceptors(FilesInterceptor('files', 10))
   @ApiParam({ name: 'id', example: 1 })
   uploadProductImages(
@@ -105,5 +127,13 @@ export class UploadsController {
     @Param('imageId', ParseIntPipe) imageId: number,
   ) {
     return this.uploadsService.deleteImage(productId, imageId);
+  }
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiBearerAuth()
+  @Delete('products/:id/poster')
+  @ApiOperation({ summary: 'Delete product poster image' })
+  @ApiParam({ name: 'id', example: 41 })
+  deletePoster(@Param('id', ParseIntPipe) productId: number) {
+    return this.uploadsService.deleteProductPoster(productId);
   }
 }
