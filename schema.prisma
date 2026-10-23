@@ -137,3 +137,17 @@ model User {
 
   @@index([role, isActive])
 }
+
+
+model AnalyticsEvent {
+  id         Int      @id @default(autoincrement())
+  path       String   @db.VarChar(2048)
+  title      String   @db.VarChar(200)
+  referrer   String?  @db.VarChar(2048)
+  sessionId  String   @db.VarChar(128)
+  occurredAt DateTime @default(now())
+
+  @@index([occurredAt])
+  @@index([sessionId, occurredAt])
+  @@index([path, occurredAt])
+}
