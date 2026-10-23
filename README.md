@@ -123,3 +123,23 @@ npm test
 ## Notes
 
 This repository currently contains a working NestJS foundation for the LEVO KG backend with Prisma, JWT auth, admin user bootstrap, catalog/product modules, and Cloudflare R2 integration scaffolding.
+
+
+## Anonymous analytics events
+
+The `POST /api/v1/analytics/events` endpoint records public storefront page views without user identity or IP address. Events are stored in the `AnalyticsEvent` table. The endpoint ignores no data silently: it rejects admin/API paths and validates payload lengths. Referrer values are reduced to their origin before storage.
+
+The admin-only `GET /api/v1/analytics/admin/summary?period=7d` endpoint returns unique anonymous session IDs, page views, product page views, and top product slugs resolved against the current product catalog. Supported periods are `7d` and `30d`. The endpoint requires a valid JWT and role `ADMIN`.
+
+### Database update
+
+After deploying this branch, run the migration against the intended database and regenerate Prisma Client:
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+npm run build
+npm test -- --runInBand
+```
+
+Review the database target before applying migrations; never run a migration against production until a backup and staging verification are complete.
