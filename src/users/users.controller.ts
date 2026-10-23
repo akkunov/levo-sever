@@ -13,6 +13,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/users')
@@ -33,7 +34,7 @@ export class UsersController {
 
   @Roles(UserRole.ADMIN)
   @Post()
-  create(@Body() dto: any) {
+  create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
