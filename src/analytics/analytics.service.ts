@@ -66,7 +66,7 @@ export class AnalyticsService {
     ]);
 
     const slugViews = popularPaths
-      .map((entry) => ({ slug: entry.path.split('/').filter(Boolean).at(-1) ?? '', views: entry._count._all }))
+      .map((entry) => ({ slug: (() => { const segments = entry.path.split('/').filter(Boolean); return segments[segments.length - 1] ?? ''; })(), views: entry._count._all }))
       .filter((entry) => entry.slug.length > 0);
     const products = await this.prisma.product.findMany({
       where: { slug: { in: slugViews.map((entry) => entry.slug) } },
